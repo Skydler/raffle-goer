@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/playwright-community/playwright-go"
 )
@@ -43,9 +44,23 @@ func EnterRaffle(page playwright.Page, link string) {
 	}
 }
 
+func ScrollToEnd(page playwright.Page) {
+	for i := 0; i < 3; i++ {
+		page.Mouse().Wheel(0, 15000)
+		time.Sleep(1 * time.Second)
+	}
+}
+
 const MainUrl = "https://scrap.tf"
 
 func main() {
+	err := playwright.Install(&playwright.RunOptions{
+		Browsers: []string{"chromium"},
+	})
+	if err != nil {
+		log.Fatalf("could not install playwright: %v", err)
+	}
+
 	pw, err := playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start playwright: %v", err)
@@ -73,6 +88,8 @@ func main() {
 	if _, err = page.Goto(MainUrl + "/raffles"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
+
+	ScrollToEnd(page)
 
 	raffles := GetRaffles(page)
 	log.Printf("Found %d raffles!", len(raffles))
